@@ -1,9 +1,11 @@
 # TaxiDriver
 
+### OpenAI Gym Taxi Driver v3 Solver
 #### Edgard Ortiz Neto
 <br>
-OpenAI Gym TaxiDriverv3 solver.
-
+<br>
+Tudo começa pelo arquivo "main.py", onde será criado um ambiente do "OpenAI Gym Taxi Driver v3" e as posições tanto do Taxi quanto do destino e o passageiro são escolhidas de maneira aleatória. Feito isso, os dados do problema são passados para a classe MeuTaxi, que executará o algoritmo A* com a heurística Distância de Manhattan presentes no arquivo TaxiDriver.py. Uma vez com a solução obtida, o método path() registra a sequência de passos do início até o final do trajeto do taxi. Com a solução em mãos, é feito uma iteração no path() para mostrar ao usuário como o taxi saiu do seu ponto inicial até o destino final.
+<br><br>
 No arquivo TaxiDriver.py, a classe TaxiDriver recebe a posição de início do Taxi, local de onde está o passageiro, o mapa do trajeto, uma booleana para
 saber se o passageiro está no taxi e o destino final.  
 
@@ -17,7 +19,7 @@ Para representar os estados, foi necessário registrar a posição do táxi, mai
 def env(self):
     return str(self.operator)+str(self.taxi)+str(self.onBoard)
 ```
-Na geração de sucessores, foi preciso criar as opções do taxi poder ir para cima, baixo, esquerda e direita (north,south,etc) além de pegar o passageiro, porém, com algumas atenções, já que o táxi não pode passar por cima dos obstáculos nem pegar um passageiro se este já estiver carregando, logo é preciso checar as posições futuras na hora de gerar sucessores além de verificar se o passageiro está a bordo.
+Na geração de sucessores, foi preciso criar as opções do taxi poder ir para cima, baixo, esquerda e direita (north,south,etc) além de pegar o passageiro, porém, com algumas atenções, já que o táxi não pode passar por cima dos obstáculos nem pegar um passageiro se este já estiver carregando, logo é preciso checar as posições futuras na hora de gerar sucessores além de verificar se o passageiro está a bordo. Observação feita ao fato de que é preciso avançar 2 posições caso seja necessário ir para direita ou esquerda, já que as ruas possuem um intervalo de uma coluna, que pode ser ou uma entrada ou parede.
 ```{python3}
 def sucessors(self):
         sucessors = []
@@ -28,19 +30,19 @@ def sucessors(self):
         goal = self.goal
         #move north
         if taxi and [taxi[0]-1,taxi[1]] not in barriers:
-            sucessors.append(TaxiDriver([taxi[0]-1,taxi[1]], pax, barriers, onBoard, "north", goal))
+            sucessors.append(TaxiDriver([taxi[0]-1,taxi[1]], pax, barriers, onBoard, "1", goal))
         #move south
         if taxi and [taxi[0]+1,taxi[1]] not in barriers:
-            sucessors.append(TaxiDriver([taxi[0]+1,taxi[1]], pax, barriers, onBoard, "south", goal))
+            sucessors.append(TaxiDriver([taxi[0]+1,taxi[1]], pax, barriers, onBoard, "0", goal))
         #move west
         if taxi and [taxi[0],taxi[1]-1] not in barriers:
-            sucessors.append(TaxiDriver([taxi[0],taxi[1]-1], pax, barriers, onBoard, "west", goal))
+            sucessors.append(TaxiDriver([taxi[0],taxi[1]-2], pax, barriers, onBoard, "3", goal))
         #move east
         if taxi and [taxi[0],taxi[1]+1] not in barriers:
-            sucessors.append(TaxiDriver([taxi[0],taxi[1]+1], pax, barriers, onBoard, "east", goal))
+            sucessors.append(TaxiDriver([taxi[0],taxi[1]+2], pax, barriers, onBoard, "2", goal))
         #pick up passanger
         if not onBoard and taxi == pax:
-            sucessors.append(TaxiDriver(taxi, pax, barriers, True, "pick up", goal))
+            sucessors.append(TaxiDriver(taxi, pax, barriers, True, "4", goal))
         return sucessors
 ```
 A Heurística utilizada foi a distância de Manhattan, que consiste na somatória de distâncias laterais e verticais de um ponto A até o B. No nosso caso, a busca A* vai buscar aquele sucessor que estiver mais próximo, com menor custo de heurística, agilizando a nossa resolução.

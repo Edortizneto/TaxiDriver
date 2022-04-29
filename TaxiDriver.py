@@ -1,21 +1,16 @@
-
-from SearchAlgorithms import AEstrela
 from Graph import State
 import numpy as np
-import time
-import gym
-
-
 
 class TaxiDriver(State):
 
     def __init__(self, taxi, pax, barriers, onBoard, op, goal):
-        self.taxi = TaxiDriver\
-            .checkPos(taxi)                 # tupla com a posição do taxi
-        self.pax = TaxiDriver\
-            .checkPos(pax)                  # tupla com a posição do passageiro
+
         self.barriers = TaxiDriver\
             .detectBarriers(barriers)       # lista com as posições dos pipes
+        self.taxi = TaxiDriver\
+            .checkPos(self,taxi)            # tupla com a posição do taxi
+        self.pax = TaxiDriver\
+            .checkPos(self,pax)             # tupla com a posição do passageiro
         self.onBoard = onBoard              # booleana se passageiro está no taxi
         self.operator = op                  # string da operação (e.g. "north", "south")
         self.goal = goal                    # tupla com o destino do passageiro
@@ -32,19 +27,19 @@ class TaxiDriver(State):
         goal = self.goal
         #move north
         if taxi and [taxi[0]-1,taxi[1]] not in barriers:
-            sucessors.append(TaxiDriver([taxi[0]-1,taxi[1]], pax, barriers, onBoard, "north", goal))
+            sucessors.append(TaxiDriver([taxi[0]-1,taxi[1]], pax, barriers, onBoard, "1", goal))
         #move south
         if taxi and [taxi[0]+1,taxi[1]] not in barriers:
-            sucessors.append(TaxiDriver([taxi[0]+1,taxi[1]], pax, barriers, onBoard, "south", goal))
+            sucessors.append(TaxiDriver([taxi[0]+1,taxi[1]], pax, barriers, onBoard, "0", goal))
         #move west
         if taxi and [taxi[0],taxi[1]-1] not in barriers:
-            sucessors.append(TaxiDriver([taxi[0],taxi[1]-1], pax, barriers, onBoard, "west", goal))
+            sucessors.append(TaxiDriver([taxi[0],taxi[1]-2], pax, barriers, onBoard, "3", goal))
         #move east
         if taxi and [taxi[0],taxi[1]+1] not in barriers:
-            sucessors.append(TaxiDriver([taxi[0],taxi[1]+1], pax, barriers, onBoard, "east", goal))
+            sucessors.append(TaxiDriver([taxi[0],taxi[1]+2], pax, barriers, onBoard, "2", goal))
         #pick up passanger
         if not onBoard and taxi == pax:
-            sucessors.append(TaxiDriver(taxi, pax, barriers, True, "pick up", goal))
+            sucessors.append(TaxiDriver(taxi, pax, barriers, True, "4", goal))
         return sucessors
     
     def is_goal(self):
@@ -83,45 +78,13 @@ class TaxiDriver(State):
             return coords
         return map
 
-    def checkPos(tupla):
-        for e in tupla:
-            if e <= 0:
-                raise ValueError("Posição inválida")
-        return tupla
-        
+    def checkPos(self,tupla):
+        bounds = max(self.barriers)
+        if tupla[0] > 0 and tupla[0] < bounds[0]:
+            if tupla[1] > 0 and tupla[1] < bounds[1]:
+                return tupla
+        else:
+            raise ValueError("Posição inválida")
 
     def print(self):
         pass #return str(self.operator)
-
-
-def main():
-    print('Busca A*')
-    env = gym.make("Taxi-v3").env
-    M = np.zeros((env.desc.shape[0],env.desc.shape[1]))
-    M = M.astype(str)
-    points = ["R", "G", "B", "Y"]
-    letters = []
-    for i in range(env.desc.shape[0]):
-        for j in range(env.desc.shape[1]):
-            M[i,j] = env.desc[i,j].decode('UTF-8')
-            if M[i,j] in points:
-                letters.append([i,j])
-    start = [1,6]
-    M[start[0],start[1]] = '0'
-    print(M)
-    map = env.desc#TaxiDriver.detectBarriers(env.desc)
-    state = TaxiDriver(start,letters[0],map,False,'',letters[2])
-    algorithm = AEstrela()
-    ts = time.time()
-    result = algorithm.search(state)
-    tf = time.time()
-    if result != None:
-        print('Achou!')
-        print(result.show_path()+" ; drop off")
-        print(f"Em {tf-ts}")
-    else:
-        print('Nao achou solucao')
-
-
-if __name__ == '__main__':
-    main()
